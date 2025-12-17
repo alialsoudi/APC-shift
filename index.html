@@ -1,71 +1,63 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دوام الورديات</title>
+    <title>Work Shift Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #f8fafc; transition: all 0.3s ease; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #0f172a; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
         .calendar-day { 
-            aspect-ratio: 1 / 1.1; 
-            border-left: 1px solid #e2e8f0; 
-            border-bottom: 1px solid #e2e8f0; 
+            aspect-ratio: 1 / 1; 
+            background: white;
             padding: 8px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            background: white;
+            transition: all 0.2s;
         }
-        .n-shift { background: #1e293b; color: white; }
-        .a-shift { background: #f59e0b; color: white; }
-        .m-shift { background: #10b981; color: white; }
-        .o-shift { background: white; color: #cbd5e1; }
-        
-        .lang-en { direction: ltr; font-family: sans-serif; }
-        .lang-en .calendar-grid { direction: ltr; }
+        .calendar-day:hover { background: #f8fafc; }
+        .shift-night { background: #1e293b !important; color: white; }
+        .shift-afternoon { background: #f59e0b !important; color: white; }
+        .shift-morning { background: #10b981 !important; color: white; }
+        .shift-off { color: #94a3b8; }
+        .header-gradient { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="antialiased">
 
-    <div id="main-container" class="min-h-screen pb-12">
-        <div class="fixed top-4 left-4 z-50">
-            <button onclick="toggleLanguage()" class="bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-full font-bold text-sm hover:bg-slate-50 transition-all">
-                English / عربي
-            </button>
-        </div>
-
-        <div class="bg-white border-b py-10 px-4 mb-8 text-center">
-            <h1 id="title" class="text-3xl font-bold text-slate-900">دوام الورديات</h1>
+    <div class="min-h-screen pb-12">
+        <div class="header-gradient text-white py-12 px-4 mb-8 text-center shadow-lg">
+            <h1 class="text-3xl font-bold tracking-tight">Work Shift Calendar</h1>
         </div>
 
         <div class="max-w-4xl mx-auto px-4">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border mb-8 flex flex-wrap gap-4 justify-center items-center">
-                <div class="flex flex-col min-w-[140px]">
-                    <span id="label-shift" class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest text-right">الوردية</span>
-                    <select id="shiftSelect" class="bg-slate-50 border rounded-xl px-4 py-3 font-bold text-slate-700 outline-none">
-                        <option value="A">Shift A</option><option value="B">Shift B</option>
-                        <option value="C">Shift C</option><option value="D">Shift D</option>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-wrap gap-6 justify-center items-end">
+                <div class="flex flex-col flex-1 min-w-[150px]">
+                    <label class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Select Shift</label>
+                    <select id="shiftSelect" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="A">Shift A</option>
+                        <option value="B">Shift B</option>
+                        <option value="C">Shift C</option>
+                        <option value="D">Shift D</option>
                     </select>
                 </div>
-                <div class="flex flex-col min-w-[140px]">
-                    <span id="label-month" class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest text-right">الشهر</span>
-                    <input type="month" id="monthPicker" class="bg-slate-50 border rounded-xl px-4 py-3 font-bold text-slate-700 outline-none">
+                <div class="flex flex-col flex-1 min-w-[150px]">
+                    <label class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Month</label>
+                    <input type="month" id="monthPicker" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
-                <div class="flex flex-col pt-5">
-                    <button onclick="exportToCalendar()" id="btn-export" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md flex items-center gap-2">
-                        تصدير للتقويم
-                    </button>
-                </div>
+                <button onclick="exportToCalendar()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md flex items-center gap-2">
+                    Export to Calendar
+                </button>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-                <div id="calendarHeader" class="bg-slate-50 p-6 text-xl font-bold text-slate-700 text-center border-b"></div>
+            <div class="bg-white p-4 md:p-8 rounded-3xl shadow-xl border border-slate-100">
+                <div id="calendarHeader" class="text-2xl font-bold text-slate-800 mb-6 text-center"></div>
                 
-                <div id="weekday-header" class="grid grid-cols-7 text-center bg-slate-100 text-[10px] font-bold text-slate-500 uppercase py-3 border-b">
-                    <div>أحد</div><div>اثنين</div><div>ثلاثاء</div><div>أربعاء</div><div>خميس</div><div>جمعة</div><div>سبت</div>
+                <div class="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 uppercase mb-4 tracking-widest">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                 </div>
                 
                 <div id="calendarGrid" class="calendar-grid"></div>
@@ -74,65 +66,65 @@
     </div>
 
     <script>
-        let currentLang = 'ar';
-        const refDate = new Date(2025, 11, 18); 
+        const refDate = new Date(2025, 11, 18); // Dec 18, 2025 (Reference: First day of Afternoon for A)
         const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
         const groupOffsets = { 'A': 0, 'B': 3, 'C': 6, 'D': 9 };
-        
-        const translations = {
-            ar: {
-                title: 'دوام الورديات', shift: 'الوردية', month: 'الشهر', export: 'تصدير للتقويم',
-                days: ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
-                shifts: { 'M': 'صباحي', 'A': 'مسائي', 'N': 'ليلي', 'O': 'عطلة' }
-            },
-            en: {
-                title: 'Work Shifts', shift: 'Shift', month: 'Month', export: 'Export to Calendar',
-                days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                shifts: { 'M': 'Morning', 'A': 'Afternoon', 'N': 'Night', 'O': 'Off' }
-            }
-        };
+        const shiftLabels = { 'M': 'Morning', 'A': 'Afternoon', 'N': 'Night', 'O': 'Off' };
 
         const monthPicker = document.getElementById('monthPicker');
         const shiftSelect = document.getElementById('shiftSelect');
         const calendarGrid = document.getElementById('calendarGrid');
 
-        monthPicker.valueAsDate = new Date();
-
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            const body = document.body;
-            const container = document.getElementById('main-container');
-            
-            if(currentLang === 'en') {
-                body.dir = 'ltr';
-                body.classList.add('lang-en');
-            } else {
-                body.dir = 'rtl';
-                body.classList.remove('lang-en');
-            }
-            
-            document.getElementById('title').innerText = translations[currentLang].title;
-            document.getElementById('label-shift').innerText = translations[currentLang].shift;
-            document.getElementById('label-month').innerText = translations[currentLang].month;
-            document.getElementById('btn-export').innerText = translations[currentLang].export;
-            
-            const dayHeaders = document.getElementById('weekday-header').children;
-            translations[currentLang].days.forEach((day, i) => dayHeaders[i].innerText = day);
-            
-            render();
-        }
+        // Initial Month
+        const now = new Date();
+        monthPicker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
         function render() {
             const [year, month] = monthPicker.value.split('-').map(Number);
             const firstDay = new Date(year, month - 1, 1);
             const daysInMonth = new Date(year, month, 0).getDate();
-            const startDay = firstDay.getDay();
+            const startDayIdx = firstDay.getDay();
             const group = shiftSelect.value;
 
-            document.getElementById('calendarHeader').innerText = firstDay.toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' });
+            document.getElementById('calendarHeader').innerText = firstDay.toLocaleString('en-US', { month: 'long', year: 'numeric' });
             calendarGrid.innerHTML = '';
 
-            for (let i = 0; i < startDay; i++) calendarGrid.innerHTML += `<div class="calendar-day bg-slate-50/50"></div>`;
+            // Blank days
+            for (let i = 0; i < startDayIdx; i++) {
+                calendarGrid.innerHTML += `<div class="calendar-day bg-slate-50/50"></div>`;
+            }
+
+            // Fill days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const current = new Date(year, month - 1, day);
+                const diff = Math.floor((current - refDate) / (1000 * 60 * 60 * 24));
+                let idx = (diff + groupOffsets[group]) % 12;
+                if (idx < 0) idx += 12;
+                
+                const type = sequence[idx];
+                const shiftClass = type === 'M' ? 'shift-morning' : type === 'A' ? 'shift-afternoon' : type === 'N' ? 'shift-night' : 'shift-off';
+                
+                calendarGrid.innerHTML += `
+                    <div class="calendar-day ${shiftClass}">
+                        <span class="text-xs font-bold">${day}</span>
+                        <span class="text-[9px] font-bold text-center uppercase tracking-tight">${shiftLabels[type]}</span>
+                    </div>`;
+            }
+        }
+
+        function exportToCalendar() {
+            const [year, month] = monthPicker.value.split('-').map(Number);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const group = shiftSelect.value;
+            
+            // Fixed Times to prevent overlaps
+            const shiftTimes = {
+                'M': { start: 'T060000', end: 'T140000' },
+                'A': { start: 'T140000', end: 'T220000' },
+                'N': { start: 'T220000', end: 'T060000', nextDay: true }
+            };
+
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ShiftPlanner//EN\nMETHOD:PUBLISH\n";
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const current = new Date(year, month - 1, day);
@@ -140,48 +132,29 @@
                 let idx = (diff + groupOffsets[group]) % 12;
                 if (idx < 0) idx += 12;
                 const s = sequence[idx];
-                const shiftName = translations[currentLang].shifts[s];
-                
-                calendarGrid.innerHTML += `
-                    <div class="calendar-day ${s !== 'O' ? s.toLowerCase() + '-shift' : ''}">
-                        <span class="text-xs font-bold">${day}</span>
-                        <div class="text-center">
-                            <div class="text-[10px] font-bold uppercase">${s}</div>
-                            <div class="text-[8px] opacity-90">${shiftName}</div>
-                        </div>
-                    </div>`;
-            }
-        }
 
-        function exportToCalendar() {
-            // نفس كود التصدير السابق يعمل هنا أيضاً
-            const [year, month] = monthPicker.value.split('-').map(Number);
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const group = shiftSelect.value;
-            const shiftTimes = { 'M': { s: '060000', e: '140000' }, 'A': { s: '140000', e: '220000' }, 'N': { s: '220000', e: '060000', next: true } };
-
-            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Work//AR\n";
-            for (let d = 1; d <= daysInMonth; d++) {
-                const current = new Date(year, month - 1, d);
-                const diff = Math.floor((current - refDate) / (1000 * 60 * 60 * 24));
-                let idx = (diff + groupOffsets[group]) % 12;
-                if (idx < 0) idx += 12;
-                const s = sequence[idx];
                 if (s === 'O') continue;
 
+                const times = shiftTimes[s];
                 const dateStr = current.toISOString().replace(/-/g, '').split('T')[0];
-                let start = `${dateStr}T${shiftTimes[s].s}`, end = `${dateStr}T${shiftTimes[s].e}`;
-                if (shiftTimes[s].next) {
-                    const next = new Date(current); next.setDate(d + 1);
-                    end = `${next.toISOString().replace(/-/g, '').split('T')[0]}T${shiftTimes[s].e}`;
+                let dtStart = dateStr + times.start;
+                let dtEnd = dateStr + times.end;
+
+                if (times.nextDay) {
+                    const nextDayDate = new Date(current);
+                    nextDayDate.setDate(current.getDate() + 1);
+                    dtEnd = nextDayDate.toISOString().replace(/-/g, '').split('T')[0] + times.end;
                 }
-                ics += `BEGIN:VEVENT\nSUMMARY:Shift ${s}\nDTSTART:${start}\nDTEND:${end}\nEND:VEVENT\n`;
+
+                icsContent += `BEGIN:VEVENT\nSUMMARY:${shiftLabels[s]} Shift\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nDESCRIPTION:Group ${group}\nEND:VEVENT\n`;
             }
-            ics += "END:VCALENDAR";
-            const blob = new Blob([ics], { type: 'text/calendar' });
+
+            icsContent += "END:VCALENDAR";
+            
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Shifts_${month}_${year}.ics`;
+            link.download = `Work_Shifts_${month}_${year}.ics`;
             link.click();
         }
 
