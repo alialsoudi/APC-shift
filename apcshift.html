@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دوام الورديات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background: #fdfeff; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .n-shift { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; border: none; }
+        .a-shift { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; }
+        .m-shift { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; }
+        .o-shift { background: #ffffff; color: #cbd5e1; border: 1px solid #f1f5f9; }
+        .day-cell { transition: all 0.3s ease; border-radius: 20px; }
+        .day-cell:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); border-radius: 30px; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <div class="min-h-screen pb-12">
+        <div class="bg-slate-900 text-white py-14 px-4 mb-8 text-center shadow-xl">
+            <h1 class="text-4xl font-bold tracking-tight">دوام الورديات</h1>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="glass-card p-6 shadow-2xl mb-10 -mt-16 flex flex-wrap gap-4 justify-center items-center">
+                <div class="flex flex-col min-w-[140px]">
+                    <span class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest text-right">المجموعة</span>
+                    <select id="shiftSelect" class="bg-white border rounded-xl px-4 py-3 font-bold text-slate-700 outline-none">
+                        <option value="A">Group A</option><option value="B">Group B</option>
+                        <option value="C">Group C</option><option value="D">Group D</option>
+                    </select>
+                </div>
+                <div class="flex flex-col min-w-[140px]">
+                    <span class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest text-right">الشهر</span>
+                    <input type="month" id="monthPicker" class="bg-white border rounded-xl px-4 py-3 font-bold text-slate-700 outline-none">
+                </div>
+                <div class="flex flex-col pt-5">
+                    <button onclick="exportToCalendar()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg flex items-center gap-2">
+                        <span>تصدير للتقويم</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-sm border border-slate-50">
+                <div id="calendarHeader" class="text-2xl font-bold text-slate-700 mb-8 flex justify-between items-center border-b pb-6"></div>
+                <div class="calendar-grid mb-6">
+                    <div class="text-center text-[10px] font-bold text-slate-300 uppercase">أحد</div><div class="text-center text-[10px] font-bold text-slate-300 uppercase">اثنين</div><div class="text-center text-[10px] font-bold text-slate-300 uppercase">ثلاثاء</div><div class="text-center text-[10px] font-bold text-slate-300 uppercase">أربعاء</div><div class="text-center text-[10px] font-bold text-slate-300 uppercase">خميس</div><div class="text-center text-[10px] font-bold text-slate-300 uppercase">جمعة</div><div class="text-center text-[10px] font-bold text-slate-300 uppercase">سبت</div>
+                </div>
+                <div id="calendarGrid" class="calendar-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const refDate = new Date(2025, 11, 18); // 18-12-2025 مسائي لـ A
+        const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
+        const groupOffsets = { 'A': 0, 'B': 3, 'C': 6, 'D': 9 };
+        const shiftNames = { 'M': 'صباحي', 'A': 'مسائي', 'N': 'ليلي', 'O': 'عطلة' };
+
+        // أوقات الدوام
+        const shiftTimes = {
+            'M': { start: '060000', end: '140000' },
+            'A': { start: '140000', end: '220000' },
+            'N': { start: '220000', end: '060000', nextDay: true }
+        };
+
+        const monthPicker = document.getElementById('monthPicker');
+        const shiftSelect = document.getElementById('shiftSelect');
+        const calendarGrid = document.getElementById('calendarGrid');
+
+        const now = new Date();
+        monthPicker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        function render() {
+            const [year, month] = monthPicker.value.split('-').map(Number);
+            const firstDay = new Date(year, month - 1, 1);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const startDayOfWeek = firstDay.getDay();
+            const group = shiftSelect.value;
+
+            document.getElementById('calendarHeader').innerHTML = `<span>${firstDay.toLocaleString('ar-EG', { month: 'long' })} ${year}</span> <span class="text-xs bg-slate-100 px-4 py-1.5 rounded-full">Group ${group}</span>`;
+            calendarGrid.innerHTML = '';
+
+            for (let i = 0; i < startDayOfWeek; i++) calendarGrid.innerHTML += `<div></div>`;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const current = new Date(year, month - 1, day);
+                const diff = Math.floor((current - refDate) / (1000 * 60 * 60 * 24));
+                let idx = (diff + groupOffsets[group]) % 12;
+                if (idx < 0) idx += 12;
+                const s = sequence[idx];
+                calendarGrid.innerHTML += `
+                    <div class="day-cell h-20 md:h-28 flex flex-col items-center justify-center ${s.toLowerCase()}-shift">
+                        <span class="text-sm font-bold">${day}</span>
+                        <span class="text-[9px] mt-1 font-bold opacity-90 uppercase">${s} - ${shiftNames[s]}</span>
+                    </div>`;
+            }
+        }
+
+        function exportToCalendar() {
+            const [year, month] = monthPicker.value.split('-').map(Number);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const group = shiftSelect.value;
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Work Shift//AR\nCALSCALE:GREGORIAN\n";
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const current = new Date(year, month - 1, day);
+                const diff = Math.floor((current - refDate) / (1000 * 60 * 60 * 24));
+                let idx = (diff + groupOffsets[group]) % 12;
+                if (idx < 0) idx += 12;
+                const s = sequence[idx];
+
+                if (s === 'O') continue; // تخطي أيام العطلة
+
+                const times = shiftTimes[s];
+                const dateStr = current.toISOString().replace(/-/g, '').split('T')[0];
+                
+                let dtStart = `${dateStr}T${times.start}`;
+                let dtEnd = `${dateStr}T${times.end}`;
+
+                // معالجة الوردية الليلية التي تنتهي في اليوم التالي
+                if (times.nextDay) {
+                    const nextDayDate = new Date(current);
+                    nextDayDate.setDate(current.getDate() + 1);
+                    const nextDayStr = nextDayDate.toISOString().replace(/-/g, '').split('T')[0];
+                    dtEnd = `${nextDayStr}T${times.end}`;
+                }
+
+                icsContent += `BEGIN:VEVENT\nSUMMARY:دوام ${shiftNames[s]}\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nDESCRIPTION:مجموعة ${group}\nEND:VEVENT\n`;
+            }
+            icsContent += "END:VCALENDAR";
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `Shift_${group}_${month}_${year}.ics`;
+            link.click();
+        }
+
+        [monthPicker, shiftSelect].forEach(el => el.addEventListener('change', render));
+        render();
+    </script>
+</body>
+</html>
