@@ -14,14 +14,14 @@ body{
     background:#f4f6f8;
 }
 
-/* Container */
+/* Card */
 .card{
     background:#ffffff;
-    border-radius:12px;
+    border-radius:14px;
     border:1px solid #e5e7eb;
 }
 
-/* Calendar cell – compact & square */
+/* Calendar cell */
 .day-cell{
     aspect-ratio:1/1;
     border-radius:6px;
@@ -44,8 +44,8 @@ body{
 /* Shift text */
 .shift-label{
     font-size:8px;
-    letter-spacing:.08em;
     font-weight:700;
+    line-height:1.1;
     text-transform:uppercase;
 }
 
@@ -66,33 +66,56 @@ body{
 }
 
 .shift-off{
-    background:#f3f4f6;
+    background:#fde8e8;
+    color:#b91c1c;
+}
+
+/* Controls */
+.control-label{
+    font-size:10px;
+    font-weight:700;
     color:#6b7280;
+    margin-bottom:2px;
+    display:block;
+}
+
+.control-input{
+    width:100%;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    padding:8px 10px;
+    font-size:12px;
+    font-weight:600;
 }
 </style>
 </head>
 
 <body class="antialiased">
 
-<div class="max-w-md mx-auto px-2 py-4 space-y-4">
+<div class="max-w-md mx-auto px-3 py-4 space-y-4">
 
 <!-- Header -->
 <div class="text-center">
     <h1 class="text-xl font-bold">Shift Calendar</h1>
-    <p class="text-[10px] text-gray-400">Compact Monthly View</p>
+    <p class="text-[10px] text-gray-400">Compact Monthly Schedule</p>
 </div>
 
 <!-- Controls -->
-<div class="card p-3 space-y-2">
-    <select id="shiftSelect" class="w-full rounded-md border px-3 py-2 text-xs font-semibold">
-        <option value="A">Group A</option>
-        <option value="B">Group B</option>
-        <option value="C">Group C</option>
-        <option value="D">Group D</option>
-    </select>
+<div class="card p-3 grid grid-cols-2 gap-3">
+    <div>
+        <label class="control-label">Shift Group</label>
+        <select id="shiftSelect" class="control-input">
+            <option value="A">Group A</option>
+            <option value="B">Group B</option>
+            <option value="C">Group C</option>
+            <option value="D">Group D</option>
+        </select>
+    </div>
 
-    <input type="month" id="monthPicker"
-           class="w-full rounded-md border px-3 py-2 text-xs font-semibold">
+    <div>
+        <label class="control-label">Month</label>
+        <input type="month" id="monthPicker" class="control-input">
+    </div>
 </div>
 
 <!-- Calendar -->
@@ -112,13 +135,24 @@ body{
     <div id="calendarGrid" class="grid grid-cols-7 gap-[2px] p-[2px]"></div>
 </div>
 
+<!-- Export Button -->
+<button onclick="exportToCalendar()"
+        class="w-full bg-gray-900 text-white text-xs font-bold py-3 rounded-xl tracking-widest active:scale-95 transition">
+    EXPORT CALENDAR
+</button>
+
 </div>
 
 <script>
 const refDate = new Date(2025,11,18);
 const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
 const groupOffsets = {A:0,B:3,C:6,D:9};
-const shiftLabels = {M:'Morning',A:'Afternoon',N:'Night',O:'Off'};
+const shiftLabels = {
+    M:'Morning',
+    A:'After<br>Noon',
+    N:'Night',
+    O:'Off'
+};
 
 const monthPicker = document.getElementById('monthPicker');
 const shiftSelect = document.getElementById('shiftSelect');
@@ -156,6 +190,31 @@ function render(){
             <div class="shift-label">${shiftLabels[t]}</div>
         </div>`;
     }
+}
+
+function exportToCalendar(){
+    const [y,m] = monthPicker.value.split('-').map(Number);
+    const days = new Date(y,m,0).getDate();
+    let ics = "BEGIN:VCALENDAR\nVERSION:2.0\n";
+
+    for(let d=1;d<=days;d++){
+        const cur=new Date(y,m-1,d);
+        let idx=Math.floor((cur-refDate)/(86400000))+groupOffsets[shiftSelect.value];
+        idx=((idx%12)+12)%12;
+        if(sequence[idx]==='O') continue;
+
+        const s=cur.toISOString().slice(0,10).replace(/-/g,'');
+        const n=new Date(cur);n.setDate(cur.getDate()+1);
+        const e=n.toISOString().slice(0,10).replace(/-/g,'');
+
+        ics+=`BEGIN:VEVENT\nSUMMARY:${shiftLabels[sequence[idx]].replace('<br>',' ')} Shift\nDTSTART;VALUE=DATE:${s}\nDTEND;VALUE=DATE:${e}\nEND:VEVENT\n`;
+    }
+    ics+="END:VCALENDAR";
+
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+    a.download="shifts.ics";
+    a.click();
 }
 
 [monthPicker,shiftSelect].forEach(e=>e.addEventListener('change',render));
