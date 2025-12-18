@@ -24,7 +24,6 @@ body{
     line-height: 1;
 }
 
-/* Card */
 .card{
     background:#ffffff;
     border-radius:14px;
@@ -59,7 +58,6 @@ body{
     outline: none;
 }
 
-/* التنسيق الخاص بالجدول (كما طلبته تماماً) */
 .day-cell{
     aspect-ratio:1/1;
     border-radius:6px;
@@ -117,7 +115,7 @@ body{
     <div class="mb-6">
         <div class="flex flex-col items-start border-l-4 border-black pl-4 py-1">
             <h1 class="main-title">Shift Tracker</h1>
-            <p class="company-name text-gray-400 mt-1">Arab Potash Company</p>
+            <p class="company-name mt-1">Arab Potash Company</p>
         </div>
     </div>
 
@@ -166,7 +164,6 @@ body{
 </div>
 
 <script>
-// Logic remains identical to your preferred version
 const refDate = new Date(2025,11,18);
 const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
 const groupOffsets = {A:0,B:3,C:6,D:9};
@@ -219,19 +216,22 @@ function exportToCalendar(){
         const cur=new Date(y,m-1,d);
         let idx=Math.floor((cur-refDate)/(86400000))+groupOffsets[shiftSelect.value];
         idx=((idx%12)+12)%12;
-        if(sequence[idx]==='O') continue;
+        
+        const type = sequence[idx];
+        // إذا كان نوع اليوم O (Off) اجعل العنوان OFF فقط، وإلا استخدم المسمى العادي
+        const label = (type === 'O') ? 'OFF' : shiftLabels[type].replace('<br>',' ');
 
         const s=cur.toISOString().slice(0,10).replace(/-/g,'');
         const n=new Date(cur);n.setDate(cur.getDate()+1);
         const e=n.toISOString().slice(0,10).replace(/-/g,'');
 
-        ics+=`BEGIN:VEVENT\nSUMMARY:${shiftLabels[sequence[idx]].replace('<br>',' ')} Shift\nDTSTART;VALUE=DATE:${s}\nDTEND;VALUE=DATE:${e}\nEND:VEVENT\n`;
+        ics+=`BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART;VALUE=DATE:${s}\nDTEND;VALUE=DATE:${e}\nEND:VEVENT\n`;
     }
     ics+="END:VCALENDAR";
 
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
-    a.download=`Shifts_${m}_${y}.ics`;
+    a.download=`APC_Shifts_${m}_${y}.ics`;
     a.click();
 }
 
