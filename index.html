@@ -3,60 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Shift Planner</title>
+    <title>Work Shift</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #0f172a; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #1f2937; }
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 4px; 
+            background: #f3f4f6; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+        }
         .calendar-day { 
-            aspect-ratio: 1 / 1; 
+            aspect-ratio: 1 / 0.9; 
             background: white;
-            padding: 8px;
+            padding: 4px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.2s;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
         }
-        .calendar-day:hover { background: #f8fafc; }
-        .shift-night { background: #1e293b !important; color: white; }
+        /* ألوان مودرن هادئة */
+        .shift-night { background: #334155 !important; color: white; }
         .shift-afternoon { background: #f59e0b !important; color: white; }
         .shift-morning { background: #10b981 !important; color: white; }
-        .shift-off { color: #94a3b8; }
-        .header-gradient { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+        .shift-off { color: #9ca3af; background: #ffffff; }
+        
+        select, input { font-size: 0.85rem !important; }
+        .header-bg { background: #111827; }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased text-[0.85rem]">
 
-    <div class="min-h-screen pb-12">
-        <div class="header-gradient text-white py-12 px-4 mb-8 text-center shadow-lg">
-            <h1 class="text-3xl font-bold tracking-tight">Work Shift Calendar</h1>
+    <div class="min-h-screen pb-8">
+        <div class="header-bg text-white py-8 px-4 mb-6 text-center shadow-md">
+            <h1 class="text-xl font-bold tracking-tight uppercase">Work Shift Planner</h1>
         </div>
 
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-wrap gap-6 justify-center items-end">
-                <div class="flex flex-col flex-1 min-w-[150px]">
-                    <label class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Select Shift</label>
-                    <select id="shiftSelect" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="A">Shift A</option>
-                        <option value="B">Shift B</option>
-                        <option value="C">Shift C</option>
-                        <option value="D">Shift D</option>
+        <div class="max-w-2xl mx-auto px-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-3 justify-center items-end">
+                <div class="flex flex-col flex-1 min-w-[120px]">
+                    <label class="text-[10px] font-bold text-gray-400 mb-1 uppercase">Shift</label>
+                    <select id="shiftSelect" class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                        <option value="A">Shift A</option><option value="B">Shift B</option>
+                        <option value="C">Shift C</option><option value="D">Shift D</option>
                     </select>
                 </div>
-                <div class="flex flex-col flex-1 min-w-[150px]">
-                    <label class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Month</label>
-                    <input type="month" id="monthPicker" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="flex flex-col flex-1 min-w-[120px]">
+                    <label class="text-[10px] font-bold text-gray-400 mb-1 uppercase">Month</label>
+                    <input type="month" id="monthPicker" class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
                 </div>
-                <button onclick="exportToCalendar()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md flex items-center gap-2">
-                    Export to Calendar
+                <button onclick="exportToCalendar()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-all text-xs">
+                    Export ICS
                 </button>
             </div>
 
-            <div class="bg-white p-4 md:p-8 rounded-3xl shadow-xl border border-slate-100">
-                <div id="calendarHeader" class="text-2xl font-bold text-slate-800 mb-6 text-center"></div>
+            <div class="bg-white p-4 rounded-2xl shadow-lg border border-gray-50">
+                <div id="calendarHeader" class="text-lg font-bold text-gray-800 mb-4 text-center"></div>
                 
-                <div class="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 uppercase mb-4 tracking-widest">
+                <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-tighter">
                     <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                 </div>
                 
@@ -66,7 +74,7 @@
     </div>
 
     <script>
-        const refDate = new Date(2025, 11, 18); // Dec 18, 2025 (Reference: First day of Afternoon for A)
+        const refDate = new Date(2025, 11, 18); 
         const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
         const groupOffsets = { 'A': 0, 'B': 3, 'C': 6, 'D': 9 };
         const shiftLabels = { 'M': 'Morning', 'A': 'Afternoon', 'N': 'Night', 'O': 'Off' };
@@ -75,7 +83,6 @@
         const shiftSelect = document.getElementById('shiftSelect');
         const calendarGrid = document.getElementById('calendarGrid');
 
-        // Initial Month
         const now = new Date();
         monthPicker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
@@ -89,12 +96,8 @@
             document.getElementById('calendarHeader').innerText = firstDay.toLocaleString('en-US', { month: 'long', year: 'numeric' });
             calendarGrid.innerHTML = '';
 
-            // Blank days
-            for (let i = 0; i < startDayIdx; i++) {
-                calendarGrid.innerHTML += `<div class="calendar-day bg-slate-50/50"></div>`;
-            }
+            for (let i = 0; i < startDayIdx; i++) calendarGrid.innerHTML += `<div class="bg-gray-50/50 rounded-sm"></div>`;
 
-            // Fill days
             for (let day = 1; day <= daysInMonth; day++) {
                 const current = new Date(year, month - 1, day);
                 const diff = Math.floor((current - refDate) / (1000 * 60 * 60 * 24));
@@ -106,8 +109,8 @@
                 
                 calendarGrid.innerHTML += `
                     <div class="calendar-day ${shiftClass}">
-                        <span class="text-xs font-bold">${day}</span>
-                        <span class="text-[9px] font-bold text-center uppercase tracking-tight">${shiftLabels[type]}</span>
+                        <span class="text-[10px] font-bold mb-1">${day}</span>
+                        <span class="text-[8px] font-bold uppercase text-center leading-tight">${shiftLabels[type]}</span>
                     </div>`;
             }
         }
@@ -117,14 +120,7 @@
             const daysInMonth = new Date(year, month, 0).getDate();
             const group = shiftSelect.value;
             
-            // Fixed Times to prevent overlaps
-            const shiftTimes = {
-                'M': { start: 'T060000', end: 'T140000' },
-                'A': { start: 'T140000', end: 'T220000' },
-                'N': { start: 'T220000', end: 'T060000', nextDay: true }
-            };
-
-            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ShiftPlanner//EN\nMETHOD:PUBLISH\n";
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Shifts//EN\n";
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const current = new Date(year, month - 1, day);
@@ -135,26 +131,20 @@
 
                 if (s === 'O') continue;
 
-                const times = shiftTimes[s];
+                // نظام All Day Event (بدون ساعات لتجنب التداخل)
                 const dateStr = current.toISOString().replace(/-/g, '').split('T')[0];
-                let dtStart = dateStr + times.start;
-                let dtEnd = dateStr + times.end;
+                const nextDay = new Date(current);
+                nextDay.setDate(current.getDate() + 1);
+                const nextDayStr = nextDay.toISOString().replace(/-/g, '').split('T')[0];
 
-                if (times.nextDay) {
-                    const nextDayDate = new Date(current);
-                    nextDayDate.setDate(current.getDate() + 1);
-                    dtEnd = nextDayDate.toISOString().replace(/-/g, '').split('T')[0] + times.end;
-                }
-
-                icsContent += `BEGIN:VEVENT\nSUMMARY:${shiftLabels[s]} Shift\nDTSTART:${dtStart}\nDTEND:${dtEnd}\nDESCRIPTION:Group ${group}\nEND:VEVENT\n`;
+                ics += `BEGIN:VEVENT\nSUMMARY:${shiftLabels[s]} Shift\nDTSTART;VALUE=DATE:${dateStr}\nDTEND;VALUE=DATE:${nextDayStr}\nDESCRIPTION:Group ${group}\nEND:VEVENT\n`;
             }
-
-            icsContent += "END:VCALENDAR";
+            ics += "END:VCALENDAR";
             
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Work_Shifts_${month}_${year}.ics`;
+            link.download = `Shifts_${month}_${year}.ics`;
             link.click();
         }
 
