@@ -3,71 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Shift</title>
+    <title>Work Shift Planner Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fdfdfd; color: #374151; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+        }
         .calendar-grid { 
             display: grid; 
             grid-template-columns: repeat(7, 1fr); 
-            gap: 2px; 
-            background: #f3f4f6; 
-            border-radius: 8px;
+            gap: 6px; 
         }
         .calendar-day { 
-            aspect-ratio: 1 / 1.2; 
-            background: white;
-            padding: 2px;
+            aspect-ratio: 1 / 1.1; 
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: 4px;
+            border-radius: 12px;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        /* الألوان الجديدة المطلوبة */
-        .shift-morning { background: #22c55e !important; color: white; } /* أخضر */
-        .shift-afternoon { background: #3b82f6 !important; color: white; } /* أزرق */
-        .shift-night { background: #78350f !important; color: white; } /* بني */
-        .shift-off { color: #9ca3af; background: #ffffff; border: 1px solid #f3f4f6; }
+        /* الألوان المطلوبة */
+        .shift-morning { background: #10b981 !important; color: white; } /* أخضر حيوي */
+        .shift-afternoon { background: #3b82f6 !important; color: white; } /* أزرق ملكي */
+        .shift-night { background: #78350f !important; color: white; } /* بني دافئ */
+        .shift-off { background: #f1f5f9 !important; color: #94a3b8; border: 1px dashed #e2e8f0; } /* عطلة */
         
-        /* تحسينات للجوال */
+        .control-panel {
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
         @media (max-width: 640px) {
-            .day-name { font-size: 8px; }
-            .shift-text { font-size: 7px; }
-            .day-num { font-size: 9px; }
+            .shift-text { font-size: 7.5px; font-weight: 600; }
+            .day-num { font-size: 11px; }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <div class="min-h-screen pb-6">
-        <div class="bg-gray-900 text-white py-6 px-4 mb-4 text-center">
-            <h1 class="text-lg font-bold uppercase tracking-widest">Shift Planner</h1>
+    <div class="min-h-screen pb-10">
+        <div class="bg-slate-900 text-white pt-10 pb-16 px-6 text-center rounded-b-[40px] shadow-xl mb-[-40px]">
+            <h1 class="text-xl font-bold tracking-wide uppercase italic">Shift Planner Pro</h1>
         </div>
 
-        <div class="max-w-md mx-auto px-2">
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 mb-4 flex gap-2 items-end">
-                <div class="flex-1">
-                    <label class="text-[9px] font-bold text-gray-400 uppercase block mb-1">Shift</label>
-                    <select id="shiftSelect" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-semibold outline-none focus:ring-1 focus:ring-blue-500">
-                        <option value="A">Shift A</option><option value="B">Shift B</option>
-                        <option value="C">Shift C</option><option value="D">Shift D</option>
-                    </select>
+        <div class="max-w-md mx-auto px-4">
+            <div class="control-panel mb-6 flex flex-col gap-4">
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Shift</label>
+                        <select id="shiftSelect" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="A">Shift A</option><option value="B">Shift B</option>
+                            <option value="C">Shift C</option><option value="D">Shift D</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Month</label>
+                        <input type="month" id="monthPicker" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold outline-none">
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <label class="text-[9px] font-bold text-gray-400 uppercase block mb-1">Month</label>
-                    <input type="month" id="monthPicker" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-semibold outline-none">
-                </div>
-                <button onclick="exportToCalendar()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded-lg text-xs transition-all">
-                    Export
+                <button onclick="exportToCalendar()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-lg active:scale-95 uppercase tracking-wider">
+                    Export Calendar
                 </button>
             </div>
 
-            <div class="bg-white p-2 rounded-xl shadow-md border border-gray-50">
-                <div id="calendarHeader" class="text-sm font-bold text-gray-800 mb-3 text-center"></div>
+            <div class="bg-white p-4 rounded-[25px] shadow-sm border border-slate-50">
+                <div id="calendarHeader" class="text-md font-bold text-slate-700 mb-5 text-center bg-slate-50 py-2 rounded-full"></div>
                 
-                <div class="grid grid-cols-7 text-center text-[9px] font-bold text-gray-400 uppercase mb-2">
+                <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-300 uppercase mb-3 tracking-widest">
                     <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                 </div>
                 
@@ -80,7 +89,7 @@
         const refDate = new Date(2025, 11, 18); 
         const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
         const groupOffsets = { 'A': 0, 'B': 3, 'C': 6, 'D': 9 };
-        const shiftLabels = { 'M': 'Morn', 'A': 'Aftr', 'N': 'Night', 'O': 'Off' };
+        const shiftLabels = { 'M': 'Morning', 'A': 'Afternoon', 'N': 'Night', 'O': 'Off' };
 
         const monthPicker = document.getElementById('monthPicker');
         const shiftSelect = document.getElementById('shiftSelect');
@@ -100,7 +109,7 @@
             calendarGrid.innerHTML = '';
 
             for (let i = 0; i < startDayIdx; i++) {
-                calendarGrid.innerHTML += `<div class="bg-gray-50/30 rounded-sm"></div>`;
+                calendarGrid.innerHTML += `<div></div>`;
             }
 
             for (let day = 1; day <= daysInMonth; day++) {
@@ -114,8 +123,8 @@
                 
                 calendarGrid.innerHTML += `
                     <div class="calendar-day ${shiftClass}">
-                        <span class="day-num font-bold mb-0.5">${day}</span>
-                        <span class="shift-text font-bold uppercase leading-none text-center">${shiftLabels[type]}</span>
+                        <span class="day-num font-bold mb-1">${day}</span>
+                        <span class="shift-text uppercase leading-none text-center">${shiftLabels[type]}</span>
                     </div>`;
             }
         }
@@ -124,7 +133,7 @@
             const [year, month] = monthPicker.value.split('-').map(Number);
             const daysInMonth = new Date(year, month, 0).getDate();
             const group = shiftSelect.value;
-            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Shifts//EN\n";
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ShiftPro//EN\n";
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const current = new Date(year, month - 1, day);
@@ -146,11 +155,11 @@
             const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Shifts_${month}_${year}.ics`;
+            link.download = `Work_Shifts_${month}_${year}.ics`;
             link.click();
         }
 
-            [monthPicker, shiftSelect].forEach(el => el.addEventListener('change', render));
+        [monthPicker, shiftSelect].forEach(el => el.addEventListener('change', render));
         render();
     </script>
 </body>
