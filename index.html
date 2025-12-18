@@ -83,6 +83,7 @@ body{
     text-transform:uppercase;
 }
 
+/* ألوان المناوبات */
 .shift-morning{ background:#dcfce7; color:#166534; }
 .shift-afternoon{ background:#dbeafe; color:#1e40af; }
 .shift-night{ background:#fef3c7; color:#92400e; }
@@ -164,6 +165,7 @@ body{
 </div>
 
 <script>
+// الإعدادات المرجعية
 const refDate = new Date(2025,11,18);
 const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
 const groupOffsets = {A:0,B:3,C:6,D:9};
@@ -213,25 +215,40 @@ function exportToCalendar(){
     let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Shifts//EN\n";
 
     for(let d=1;d<=days;d++){
-        const cur=new Date(y,m-1,d);
-        let idx=Math.floor((cur-refDate)/(86400000))+groupOffsets[shiftSelect.value];
-        idx=((idx%12)+12)%12;
+        const cur = new Date(y,m-1,d);
+        let idx = Math.floor((cur-refDate)/(86400000)) + groupOffsets[shiftSelect.value];
+        idx = ((idx%12)+12)%12;
         
         const type = sequence[idx];
-        // إذا كان نوع اليوم O (Off) اجعل العنوان OFF فقط، وإلا استخدم المسمى العادي
         const label = (type === 'O') ? 'OFF' : shiftLabels[type].replace('<br>',' ');
 
-        const s=cur.toISOString().slice(0,10).replace(/-/g,'');
-        const n=new Date(cur);n.setDate(cur.getDate()+1);
-        const e=n.toISOString().slice(0,10).replace(/-/g,'');
+        let dtStart, dtEnd;
+        const dateStr = cur.toISOString().slice(0,10).replace(/-/g,'');
 
-        ics+=`BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART;VALUE=DATE:${s}\nDTEND;VALUE=DATE:${e}\nEND:VEVENT\n`;
+        // تحديد مواعيد البداية لضمان ظهورها في شاشة القفل
+        if (type === 'M') { // الصباحي 6 الصبح
+            dtStart = `${dateStr}T060000`;
+            dtEnd = `${dateStr}T070000`;
+        } else if (type === 'A') { // المسائي 2 الظهر
+            dtStart = `${dateStr}T140000`;
+            dtEnd = `${dateStr}T150000`;
+        } else if (type === 'N') { // الليلي 10 بالليل
+            dtStart = `${dateStr}T220000`;
+            dtEnd = `${dateStr}T230000`;
+        } else { // OFF (يوم كامل)
+            dtStart = `;VALUE=DATE:${dateStr}`;
+            const nextDay = new Date(cur);
+            nextDay.setDate(cur.getDate() + 1);
+            dtEnd = `;VALUE=DATE:${nextDay.toISOString().slice(0,10).replace(/-/g,'')}`;
+        }
+
+        ics += `BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART${type==='O'?dtStart:':'+dtStart}\nDTEND${type==='O'?dtEnd:':'+dtEnd}\nEND:VEVENT\n`;
     }
-    ics+="END:VCALENDAR";
+    ics += "END:VCALENDAR";
 
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
-    a.download=`APC_Shifts_${m}_${y}.ics`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+    a.download = `APC_Shifts_${m}_${y}.ics`;
     a.click();
 }
 
