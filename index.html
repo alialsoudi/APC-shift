@@ -164,7 +164,7 @@ body{
 </div>
 
 <script>
-const refDate = new Date(2025,11,18);
+const refDate = new Date(2025,11,18); // 18 Dec 2025
 const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
 const groupOffsets = {A:0,B:3,C:6,D:9};
 const shiftLabels = { M:'Morning', A:'After<br>Noon', N:'Night', O:'Off' };
@@ -207,6 +207,7 @@ function render(){
     }
 }
 
+// دالة التصدير المعدلة لإصلاح مشكلة التاريخ (Timezone Fix)
 function exportToCalendar(){
     const [y,m] = monthPicker.value.split('-').map(Number);
     const days = new Date(y,m,0).getDate();
@@ -218,22 +219,29 @@ function exportToCalendar(){
         idx = ((idx%12)+12)%12;
         
         const type = sequence[idx];
-        // تخصيص المسمى للعرض في التقويم
         const label = (type === 'O') ? 'OFF' : shiftLabels[type].replace('<br>',' ');
 
-        const dateStr = cur.toISOString().slice(0,10).replace(/-/g,'');
-        const nextDay = new Date(cur);
-        nextDay.setDate(cur.getDate() + 1);
-        const nextDateStr = nextDay.toISOString().slice(0,10).replace(/-/g,'');
+        // معالجة التاريخ يدوياً لتجنب مشاكل توقيت الـ ISO
+        const year = cur.getFullYear();
+        const month = String(cur.getMonth() + 1).padStart(2, '0');
+        const day = String(cur.getDate()).padStart(2, '0');
+        const dateStr = `${year}${month}${day}`;
 
-        // جميع الأحداث (بما فيها الشفتات والعطل) ستكون "طوال اليوم"
+        // تاريخ اليوم التالي للإغلاق
+        const next = new Date(cur);
+        next.setDate(cur.getDate() + 1);
+        const nextYear = next.getFullYear();
+        const nextMonth = String(next.getMonth() + 1).padStart(2, '0');
+        const nextDay = String(next.getDate()).padStart(2, '0');
+        const nextDateStr = `${nextYear}${nextMonth}${nextDay}`;
+
         ics += `BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART;VALUE=DATE:${dateStr}\nDTEND;VALUE=DATE:${nextDateStr}\nEND:VEVENT\n`;
     }
     ics += "END:VCALENDAR";
 
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
-    a.download = `APC_AllDay_Shifts_${m}_${y}.ics`;
+    a.download = `APC_Final_Shifts_${m}_${y}.ics`;
     a.click();
 }
 
