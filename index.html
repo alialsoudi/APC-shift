@@ -1,139 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Shift Tracker - APC</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body{
-    font-family:'Inter',sans-serif;
-    background:#ffffff;
-}
+    :root { --main-font: 'Inter', 'Noto Kufi Arabic', sans-serif; }
+    body { font-family: var(--main-font); background: #ffffff; transition: all 0.3s ease; }
 
-.main-title {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    color: #000;
-    text-transform: uppercase;
-    font-style: italic;
-    line-height: 1;
-}
+    .main-title {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: #000;
+        text-transform: uppercase;
+        font-style: italic;
+        line-height: 1;
+    }
 
-.card{
-    background:#ffffff;
-    border-radius:14px;
-    border:1px solid #e5e7eb;
-}
+    .card { background: #ffffff; border-radius: 14px; border: 1px solid #e5e7eb; }
 
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
+    .input-wrapper { position: relative; display: flex; align-items: center; }
+    
+    /* سهم القائمة المنسدلة يتكيف مع الاتجاه */
+    [dir="rtl"] .input-wrapper::after { left: 12px; right: auto; content: '▼'; font-size: 8px; position: absolute; color: #9ca3af; pointer-events: none; }
+    [dir="ltr"] .input-wrapper::after { right: 12px; left: auto; content: '▼'; font-size: 8px; position: absolute; color: #9ca3af; pointer-events: none; }
 
-.input-wrapper::after {
-    content: '▼';
-    font-size: 8px;
-    position: absolute;
-    right: 12px;
-    color: #9ca3af;
-    pointer-events: none;
-}
+    .control-input {
+        width: 100%; border-radius: 12px; border: 1.5px solid #f3f4f6; background: #f9fafb;
+        padding: 10px 12px; font-size: 12px; font-weight: 700; appearance: none; -webkit-appearance: none; outline: none;
+    }
 
-.control-input{
-    width:100%;
-    border-radius:12px;
-    border: 1.5px solid #f3f4f6;
-    background:#f9fafb;
-    padding:10px 12px;
-    font-size:12px;
-    font-weight:700;
-    appearance: none;
-    -webkit-appearance: none;
-    outline: none;
-}
+    /* تنسيق الجدول الثابت */
+    .day-cell {
+        aspect-ratio: 1/1; border-radius: 6px; padding: 4px 2px;
+        display: flex; flex-direction: column; justify-content: space-between;
+        align-items: center; font-weight: 600; text-align: center;
+    }
 
-.day-cell{
-    aspect-ratio:1/1;
-    border-radius:6px;
-    padding:4px 2px;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    align-items:center;
-    font-weight:600;
-    text-align:center;
-}
+    .day-number { font-size: 11px; font-weight: 700; color: #111827; }
+    .shift-label { font-size: 8px; font-weight: 700; line-height: 1.1; text-transform: uppercase; }
 
-.day-number{
-    font-size:11px;
-    font-weight:700;
-    color:#111827;
-}
+    .shift-morning { background: #dcfce7; color: #166534; }
+    .shift-afternoon { background: #dbeafe; color: #1e40af; }
+    .shift-night { background: #fef3c7; color: #92400e; }
+    .shift-off { background: #fde8e8; color: #b91c1c; }
 
-.shift-label{
-    font-size:8px;
-    font-weight:700;
-    line-height:1.1;
-    text-transform:uppercase;
-}
+    .control-label { font-size: 9px; font-weight: 800; color: #9ca3af; margin-bottom: 4px; display: block; text-transform: uppercase; }
+    .company-name { font-size: 10px; font-weight: 700; color: #4b5563; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
 
-.shift-morning{ background:#dcfce7; color:#166534; }
-.shift-afternoon{ background:#dbeafe; color:#1e40af; }
-.shift-night{ background:#fef3c7; color:#92400e; }
-.shift-off{ background:#fde8e8; color:#b91c1c; }
-
-.control-label{
-    font-size:9px;
-    font-weight:800;
-    color:#9ca3af;
-    margin-bottom:4px;
-    display:block;
-    text-transform: uppercase;
-}
-
-.company-name {
-    font-size: 10px;
-    font-weight: 700;
-    color: #4b5563;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 2px;
-}
+    /* زر تغيير اللغة */
+    .lang-btn {
+        position: absolute; top: 20px; left: 20px; /* في العربي يكون عاليسار */
+        background: #f3f4f6; padding: 6px 12px; border-radius: 8px;
+        font-size: 10px; font-weight: 800; cursor: pointer; border: 1px solid #e5e7eb;
+    }
+    [dir="ltr"] .lang-btn { left: auto; right: 20px; }
 </style>
 </head>
 
 <body class="antialiased">
 
-<div class="max-w-md mx-auto px-5 py-8 flex flex-col min-h-screen">
+<div class="max-w-md mx-auto px-5 py-8 flex flex-col min-h-screen relative">
+    
+    <button onclick="toggleLang()" class="lang-btn" id="langBtn">EN</button>
 
     <div class="mb-6">
-        <div class="flex flex-col items-start border-l-4 border-black pl-4 py-1">
-            <h1 class="main-title">Shift Tracker</h1>
-            <p class="company-name mt-1">Arab Potash Company</p>
+        <div class="flex flex-col items-start border-r-4 [dir='ltr']:border-r-0 [dir='ltr']:border-l-4 border-black pr-4 [dir='ltr']:pl-4 py-1">
+            <h1 class="main-title" id="t-title">متابع الشفتات</h1>
+            <p class="company-name mt-1" id="t-company">شركة البوتاس العربية</p>
         </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-6">
         <div>
-            <label class="control-label">Select Shift</label>
+            <label class="control-label" id="t-select-shift">اختر الوردية</label>
             <div class="input-wrapper">
                 <select id="shiftSelect" class="control-input">
-                    <option value="A">Shift A</option>
-                    <option value="B">Shift B</option>
-                    <option value="C">Shift C</option>
-                    <option value="D">Shift D</option>
+                    <option value="A">الشفت A</option>
+                    <option value="B">الشفت B</option>
+                    <option value="C">الشفت C</option>
+                    <option value="D">الشفت D</option>
                 </select>
             </div>
         </div>
 
         <div>
-            <label class="control-label">Pick Month</label>
+            <label class="control-label" id="t-pick-month">اختر الشهر</label>
             <div class="input-wrapper">
                 <input type="month" id="monthPicker" class="control-input">
             </div>
@@ -143,110 +100,164 @@ body{
     <div class="card shadow-sm mb-6">
         <div id="calendarHeader" class="text-center py-3 font-bold text-sm border-b bg-gray-50/50 uppercase tracking-widest text-gray-700"></div>
 
-        <div class="grid grid-cols-7 text-center text-[9px] font-black text-gray-400 py-2 border-b uppercase">
-            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-        </div>
+        <div id="weekDaysRow" class="grid grid-cols-7 text-center text-[9px] font-black text-gray-400 py-2 border-b uppercase">
+            </div>
 
         <div id="calendarGrid" class="grid grid-cols-7 gap-[3px] p-2"></div>
     </div>
 
-    <button onclick="exportToCalendar()"
+    <button onclick="exportToCalendar()" id="t-export-btn"
             class="w-full bg-black text-white text-[11px] font-bold py-4 rounded-2xl tracking-[0.2em] active:scale-95 transition shadow-lg mb-8 uppercase">
-        Export Calendar
+        تصدير للتقويم
     </button>
 
-    <div class="mt-auto py-4 text-center">
+    <div class="mt-auto py-4 text-center border-t border-gray-100">
         <p class="text-[10px] text-gray-400 font-medium">
-            © <script>document.write(new Date().getFullYear())</script> All Rights Reserved | <span class="text-gray-600 font-bold tracking-wide">Ali Al-Soudi</span>
+            © <span id="year"></span> <span id="t-rights">جميع الحقوق محفوظة</span> | <span class="text-gray-600 font-bold tracking-wide">Ali Al-Soudi</span>
         </p>
     </div>
-
 </div>
 
 <script>
-const refDate = new Date(2025,11,18); // 18 Dec 2025
-const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
-const groupOffsets = {A:0,B:3,C:6,D:9};
-const shiftLabels = { M:'Morning', A:'After<br>Noon', N:'Night', O:'Off' };
+    let currentLang = 'ar';
+    const yearSpan = document.getElementById('year');
+    yearSpan.innerText = new Date().getFullYear();
 
-const monthPicker = document.getElementById('monthPicker');
-const shiftSelect = document.getElementById('shiftSelect');
-const calendarGrid = document.getElementById('calendarGrid');
+    const i18n = {
+        ar: {
+            title: "متابع الشفتات",
+            company: "شركة البوتاس العربية",
+            selectShift: "اختر الوردية",
+            pickMonth: "اختر الشهر",
+            exportBtn: "تصدير للتقويم",
+            rights: "جميع الحقوق محفوظة",
+            days: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
+            shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "عطلة" },
+            groups: ["الشفت A", "الشفت B", "الشفت C", "الشفت D"]
+        },
+        en: {
+            title: "Shift Tracker",
+            company: "Arab Potash Company",
+            selectShift: "Select Shift",
+            pickMonth: "Pick Month",
+            exportBtn: "Export Calendar",
+            rights: "All Rights Reserved",
+            days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+            shifts: { M: "Morning", A: "Afternoon", N: "Night", O: "Off" },
+            groups: ["Group A", "Group B", "Group C", "Group D"]
+        }
+    };
 
-const now = new Date();
-monthPicker.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const refDate = new Date(2025, 11, 18);
+    const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
+    const groupOffsets = {A:0, B:3, C:6, D:9};
 
-function render(){
-    const [y,m] = monthPicker.value.split('-').map(Number);
-    const first = new Date(y,m-1,1);
-    const days = new Date(y,m,0).getDate();
-    const start = first.getDay();
+    const monthPicker = document.getElementById('monthPicker');
+    const shiftSelect = document.getElementById('shiftSelect');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const weekDaysRow = document.getElementById('weekDaysRow');
 
-    document.getElementById('calendarHeader').innerText =
-        first.toLocaleString('en-US',{month:'long',year:'numeric'});
+    const now = new Date();
+    monthPicker.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-    calendarGrid.innerHTML='';
-
-    for(let i=0;i<start;i++){
-        calendarGrid.innerHTML+='<div></div>';
+    function toggleLang() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        document.documentElement.lang = currentLang;
+        document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+        updateUI();
+        render();
     }
 
-    for(let d=1;d<=days;d++){
-        const cur = new Date(y,m-1,d);
-        let idx = Math.floor((cur-refDate)/(86400000)) + groupOffsets[shiftSelect.value];
-        idx = ((idx%12)+12)%12;
+    function updateUI() {
+        const lang = i18n[currentLang];
+        document.getElementById('t-title').innerText = lang.title;
+        document.getElementById('t-company').innerText = lang.company;
+        document.getElementById('t-select-shift').innerText = lang.selectShift;
+        document.getElementById('t-pick-month').innerText = lang.pickMonth;
+        document.getElementById('t-export-btn').innerText = lang.exportBtn;
+        document.getElementById('t-rights').innerText = lang.rights;
 
-        const t = sequence[idx];
-        const cls = t==='M'?'shift-morning':t==='A'?'shift-afternoon':t==='N'?'shift-night':'shift-off';
+        // تحديث خيارات الشفتات
+        const options = shiftSelect.options;
+        for (let i = 0; i < options.length; i++) {
+            options[i].text = lang.groups[i];
+        }
 
-        calendarGrid.innerHTML += `
-        <div class="day-cell ${cls}">
-            <div class="day-number">${d}</div>
-            <div class="shift-label">${shiftLabels[t]}</div>
-        </div>`;
+        // تحديث أيام الأسبوع
+        weekDaysRow.innerHTML = lang.days.map(d => `<div>${d}</div>`).join('');
     }
-}
 
-// دالة التصدير المعدلة لإصلاح مشكلة التاريخ (Timezone Fix)
-function exportToCalendar(){
-    const [y,m] = monthPicker.value.split('-').map(Number);
-    const days = new Date(y,m,0).getDate();
-    let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Shifts//EN\n";
+    function render() {
+        const [y, m] = monthPicker.value.split('-').map(Number);
+        const first = new Date(y, m - 1, 1);
+        const daysCount = new Date(y, m, 0).getDate();
+        const startDay = first.getDay();
 
-    for(let d=1;d<=days;d++){
-        const cur = new Date(y,m-1,d);
-        let idx = Math.floor((cur-refDate)/(86400000)) + groupOffsets[shiftSelect.value];
-        idx = ((idx%12)+12)%12;
-        
-        const type = sequence[idx];
-        const label = (type === 'O') ? 'OFF' : shiftLabels[type].replace('<br>',' ');
+        document.getElementById('calendarHeader').innerText =
+            first.toLocaleString(currentLang === 'ar' ? 'ar-JO' : 'en-US', { month: 'long', year: 'numeric' });
 
-        // معالجة التاريخ يدوياً لتجنب مشاكل توقيت الـ ISO
-        const year = cur.getFullYear();
-        const month = String(cur.getMonth() + 1).padStart(2, '0');
-        const day = String(cur.getDate()).padStart(2, '0');
-        const dateStr = `${year}${month}${day}`;
+        calendarGrid.innerHTML = '';
 
-        // تاريخ اليوم التالي للإغلاق
-        const next = new Date(cur);
-        next.setDate(cur.getDate() + 1);
-        const nextYear = next.getFullYear();
-        const nextMonth = String(next.getMonth() + 1).padStart(2, '0');
-        const nextDay = String(next.getDate()).padStart(2, '0');
-        const nextDateStr = `${nextYear}${nextMonth}${nextDay}`;
+        for (let i = 0; i < startDay; i++) {
+            calendarGrid.innerHTML += '<div></div>';
+        }
 
-        ics += `BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART;VALUE=DATE:${dateStr}\nDTEND;VALUE=DATE:${nextDateStr}\nEND:VEVENT\n`;
+        for (let d = 1; d <= daysCount; d++) {
+            const cur = new Date(y, m - 1, d);
+            let idx = Math.floor((cur - refDate) / (86400000)) + groupOffsets[shiftSelect.value];
+            idx = ((idx % 12) + 12) % 12;
+
+            const t = sequence[idx];
+            const cls = t==='M'?'shift-morning':t==='A'?'shift-afternoon':t==='N'?'shift-night':'shift-off';
+            const label = i18n[currentLang].shifts[t];
+
+            calendarGrid.innerHTML += `
+            <div class="day-cell ${cls}">
+                <div class="day-number">${d}</div>
+                <div class="shift-label">${label}</div>
+            </div>`;
+        }
     }
-    ics += "END:VCALENDAR";
 
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
-    a.download = `APC_Final_Shifts_${m}_${y}.ics`;
-    a.click();
-}
+    function exportToCalendar() {
+        const [y, m] = monthPicker.value.split('-').map(Number);
+        const daysCount = new Date(y, m, 0).getDate();
+        let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Shifts//EN\n";
 
-[monthPicker,shiftSelect].forEach(e=>e.addEventListener('change',render));
-render();
+        for (let d = 1; d <= daysCount; d++) {
+            const cur = new Date(y, m - 1, d);
+            let idx = Math.floor((cur - refDate) / (86400000)) + groupOffsets[shiftSelect.value];
+            idx = ((idx % 12) + 12) % 12;
+            
+            const type = sequence[idx];
+            const label = i18n[currentLang].shifts[type];
+
+            const year = cur.getFullYear();
+            const month = String(cur.getMonth() + 1).padStart(2, '0');
+            const day = String(cur.getDate()).padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+
+            const next = new Date(cur);
+            next.setDate(cur.getDate() + 1);
+            const nextDateStr = `${next.getFullYear()}${String(next.getMonth()+1).padStart(2,'0')}${String(next.getDate()).padStart(2,'0')}`;
+
+            ics += `BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART;VALUE=DATE:${dateStr}\nDTEND;VALUE=DATE:${nextDateStr}\nEND:VEVENT\n`;
+        }
+        ics += "END:VCALENDAR";
+
+        const a = document.createElement('a');
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        a.href = URL.createObjectURL(blob);
+        a.download = `APC_Shifts_${m}_${y}.ics`;
+        a.click();
+    }
+
+    [monthPicker, shiftSelect].forEach(e => e.addEventListener('change', render));
+    
+    // التشغيل الأولي
+    updateUI();
+    render();
 </script>
 
 </body>
