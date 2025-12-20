@@ -6,11 +6,11 @@
 <title>Shift Tracker - APC</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;700;800&display=swap" rel="stylesheet">
 
 <style>
     :root { --main-font: 'Inter', 'Noto Kufi Arabic', sans-serif; }
-    body { font-family: var(--main-font); background: #ffffff; }
+    body { font-family: var(--main-font); background: #ffffff; -webkit-font-smoothing: antialiased; }
 
     .main-title {
         font-size: 26px;
@@ -58,9 +58,10 @@
     }
     [dir="ltr"] .lang-btn { left: auto; right: 20px; }
 
-    /* توحيد خط الزر */
+    /* تحسين خط الزر لضمان عدم التقطع */
     #t-export-btn {
-        font-family: var(--main-font);
+        font-family: 'Noto Kufi Arabic', sans-serif;
+        letter-spacing: normal; /* إلغاء التباعد الذي يسبب تقطع الحروف العربية */
     }
 </style>
 </head>
@@ -83,10 +84,10 @@
             <label class="control-label" id="t-select-shift">اختر الوردية</label>
             <div class="input-wrapper">
                 <select id="shiftSelect" class="control-input">
-                    <option value="A">شفت A</option>
-                    <option value="B">شفت B</option>
-                    <option value="C">شفت C</option>
-                    <option value="D">شفت D</option>
+                    <option value="A">الوردية A</option>
+                    <option value="B">الوردية B</option>
+                    <option value="C">الوردية C</option>
+                    <option value="D">الوردية D</option>
                 </select>
             </div>
         </div>
@@ -106,7 +107,7 @@
     </div>
 
     <button onclick="exportToCalendar()" id="t-export-btn"
-            class="w-full bg-black text-white text-[12px] font-bold py-4 rounded-2xl tracking-widest active:scale-95 transition shadow-lg mb-8 uppercase">
+            class="w-full bg-black text-white text-[13px] font-bold py-4 rounded-2xl active:scale-95 transition shadow-lg mb-8">
         تصدير للتقويم
     </button>
 
@@ -131,7 +132,7 @@
             rights: "جميع الحقوق محفوظة",
             days: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
             shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "عطلة" },
-            groups: ["شفت A", "شفت B", "شفت C", "شفت D"]
+            groups: ["الوردية A", "الوردية B", "الوردية C", "الوردية D"]
         },
         en: {
             title: "Shift Tracker",
@@ -176,6 +177,7 @@
         document.getElementById('t-export-btn').innerText = lang.exportBtn;
         document.getElementById('t-rights').innerText = lang.rights;
 
+        // تعديل مسميات الورديات في القائمة
         const options = shiftSelect.options;
         for (let i = 0; i < options.length; i++) {
             options[i].text = lang.groups[i];
@@ -223,7 +225,6 @@
             idx = ((idx % 12) + 12) % 12;
             
             const type = sequence[idx];
-            // المسمى في التقويم بدون <br>
             const label = i18n[currentLang].shifts[type].replace('<br>',' ');
 
             const dateStr = `${cur.getFullYear()}${String(cur.getMonth()+1).padStart(2,'0')}${String(cur.getDate()).padStart(2,'0')}`;
