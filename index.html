@@ -58,10 +58,9 @@
     }
     [dir="ltr"] .lang-btn { left: auto; right: 20px; }
 
-    /* تحسين خط الزر لضمان عدم التقطع */
     #t-export-btn {
         font-family: 'Noto Kufi Arabic', sans-serif;
-        letter-spacing: normal; /* إلغاء التباعد الذي يسبب تقطع الحروف العربية */
+        letter-spacing: normal;
     }
 </style>
 </head>
@@ -149,7 +148,9 @@
 
     const refDate = new Date(2025, 11, 18);
     const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
-    const groupOffsets = {A:0, B:3, C:6, D:9};
+    
+    // تم تبديل القيم هنا بين B و D كما طلبت
+    const groupOffsets = {A:0, B:9, C:6, D:3}; 
 
     const monthPicker = document.getElementById('monthPicker');
     const shiftSelect = document.getElementById('shiftSelect');
@@ -177,7 +178,6 @@
         document.getElementById('t-export-btn').innerText = lang.exportBtn;
         document.getElementById('t-rights').innerText = lang.rights;
 
-        // تعديل مسميات الورديات في القائمة
         const options = shiftSelect.options;
         for (let i = 0; i < options.length; i++) {
             options[i].text = lang.groups[i];
