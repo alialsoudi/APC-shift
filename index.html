@@ -10,7 +10,7 @@
 
 <style>
     :root { --main-font: 'Inter', 'Noto Kufi Arabic', sans-serif; }
-    body { font-family: var(--main-font); background: #ffffff; transition: all 0.3s ease; }
+    body { font-family: var(--main-font); background: #ffffff; }
 
     .main-title {
         font-size: 26px;
@@ -23,19 +23,17 @@
     }
 
     .card { background: #ffffff; border-radius: 14px; border: 1px solid #e5e7eb; }
-
     .input-wrapper { position: relative; display: flex; align-items: center; }
     
-    /* سهم القائمة المنسدلة يتكيف مع الاتجاه */
     [dir="rtl"] .input-wrapper::after { left: 12px; right: auto; content: '▼'; font-size: 8px; position: absolute; color: #9ca3af; pointer-events: none; }
     [dir="ltr"] .input-wrapper::after { right: 12px; left: auto; content: '▼'; font-size: 8px; position: absolute; color: #9ca3af; pointer-events: none; }
 
     .control-input {
         width: 100%; border-radius: 12px; border: 1.5px solid #f3f4f6; background: #f9fafb;
         padding: 10px 12px; font-size: 12px; font-weight: 700; appearance: none; -webkit-appearance: none; outline: none;
+        font-family: inherit;
     }
 
-    /* تنسيق الجدول الثابت */
     .day-cell {
         aspect-ratio: 1/1; border-radius: 6px; padding: 4px 2px;
         display: flex; flex-direction: column; justify-content: space-between;
@@ -53,13 +51,17 @@
     .control-label { font-size: 9px; font-weight: 800; color: #9ca3af; margin-bottom: 4px; display: block; text-transform: uppercase; }
     .company-name { font-size: 10px; font-weight: 700; color: #4b5563; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
 
-    /* زر تغيير اللغة */
     .lang-btn {
-        position: absolute; top: 20px; left: 20px; /* في العربي يكون عاليسار */
+        position: absolute; top: 20px; left: 20px;
         background: #f3f4f6; padding: 6px 12px; border-radius: 8px;
         font-size: 10px; font-weight: 800; cursor: pointer; border: 1px solid #e5e7eb;
     }
     [dir="ltr"] .lang-btn { left: auto; right: 20px; }
+
+    /* توحيد خط الزر */
+    #t-export-btn {
+        font-family: var(--main-font);
+    }
 </style>
 </head>
 
@@ -81,10 +83,10 @@
             <label class="control-label" id="t-select-shift">اختر الوردية</label>
             <div class="input-wrapper">
                 <select id="shiftSelect" class="control-input">
-                    <option value="A">الشفت A</option>
-                    <option value="B">الشفت B</option>
-                    <option value="C">الشفت C</option>
-                    <option value="D">الشفت D</option>
+                    <option value="A">شفت A</option>
+                    <option value="B">شفت B</option>
+                    <option value="C">شفت C</option>
+                    <option value="D">شفت D</option>
                 </select>
             </div>
         </div>
@@ -99,15 +101,12 @@
 
     <div class="card shadow-sm mb-6">
         <div id="calendarHeader" class="text-center py-3 font-bold text-sm border-b bg-gray-50/50 uppercase tracking-widest text-gray-700"></div>
-
-        <div id="weekDaysRow" class="grid grid-cols-7 text-center text-[9px] font-black text-gray-400 py-2 border-b uppercase">
-            </div>
-
+        <div id="weekDaysRow" class="grid grid-cols-7 text-center text-[9px] font-black text-gray-400 py-2 border-b uppercase"></div>
         <div id="calendarGrid" class="grid grid-cols-7 gap-[3px] p-2"></div>
     </div>
 
     <button onclick="exportToCalendar()" id="t-export-btn"
-            class="w-full bg-black text-white text-[11px] font-bold py-4 rounded-2xl tracking-[0.2em] active:scale-95 transition shadow-lg mb-8 uppercase">
+            class="w-full bg-black text-white text-[12px] font-bold py-4 rounded-2xl tracking-widest active:scale-95 transition shadow-lg mb-8 uppercase">
         تصدير للتقويم
     </button>
 
@@ -120,8 +119,7 @@
 
 <script>
     let currentLang = 'ar';
-    const yearSpan = document.getElementById('year');
-    yearSpan.innerText = new Date().getFullYear();
+    document.getElementById('year').innerText = new Date().getFullYear();
 
     const i18n = {
         ar: {
@@ -133,7 +131,7 @@
             rights: "جميع الحقوق محفوظة",
             days: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
             shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "عطلة" },
-            groups: ["الشفت A", "الشفت B", "الشفت C", "الشفت D"]
+            groups: ["شفت A", "شفت B", "شفت C", "شفت D"]
         },
         en: {
             title: "Shift Tracker",
@@ -143,8 +141,8 @@
             exportBtn: "Export Calendar",
             rights: "All Rights Reserved",
             days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            shifts: { M: "Morning", A: "Afternoon", N: "Night", O: "Off" },
-            groups: ["Group A", "Group B", "Group C", "Group D"]
+            shifts: { M: "Morning", A: "After<br>Noon", N: "Night", O: "Off" },
+            groups: ["Shift A", "Shift B", "Shift C", "Shift D"]
         }
     };
 
@@ -178,13 +176,10 @@
         document.getElementById('t-export-btn').innerText = lang.exportBtn;
         document.getElementById('t-rights').innerText = lang.rights;
 
-        // تحديث خيارات الشفتات
         const options = shiftSelect.options;
         for (let i = 0; i < options.length; i++) {
             options[i].text = lang.groups[i];
         }
-
-        // تحديث أيام الأسبوع
         weekDaysRow.innerHTML = lang.days.map(d => `<div>${d}</div>`).join('');
     }
 
@@ -198,10 +193,7 @@
             first.toLocaleString(currentLang === 'ar' ? 'ar-JO' : 'en-US', { month: 'long', year: 'numeric' });
 
         calendarGrid.innerHTML = '';
-
-        for (let i = 0; i < startDay; i++) {
-            calendarGrid.innerHTML += '<div></div>';
-        }
+        for (let i = 0; i < startDay; i++) { calendarGrid.innerHTML += '<div></div>'; }
 
         for (let d = 1; d <= daysCount; d++) {
             const cur = new Date(y, m - 1, d);
@@ -231,13 +223,10 @@
             idx = ((idx % 12) + 12) % 12;
             
             const type = sequence[idx];
-            const label = i18n[currentLang].shifts[type];
+            // المسمى في التقويم بدون <br>
+            const label = i18n[currentLang].shifts[type].replace('<br>',' ');
 
-            const year = cur.getFullYear();
-            const month = String(cur.getMonth() + 1).padStart(2, '0');
-            const day = String(cur.getDate()).padStart(2, '0');
-            const dateStr = `${year}${month}${day}`;
-
+            const dateStr = `${cur.getFullYear()}${String(cur.getMonth()+1).padStart(2,'0')}${String(cur.getDate()).padStart(2,'0')}`;
             const next = new Date(cur);
             next.setDate(cur.getDate() + 1);
             const nextDateStr = `${next.getFullYear()}${String(next.getMonth()+1).padStart(2,'0')}${String(next.getDate()).padStart(2,'0')}`;
@@ -247,15 +236,12 @@
         ics += "END:VCALENDAR";
 
         const a = document.createElement('a');
-        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
         a.download = `APC_Shifts_${m}_${y}.ics`;
         a.click();
     }
 
     [monthPicker, shiftSelect].forEach(e => e.addEventListener('change', render));
-    
-    // التشغيل الأولي
     updateUI();
     render();
 </script>
