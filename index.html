@@ -130,7 +130,7 @@
             exportBtn: "تصدير للتقويم",
             rights: "جميع الحقوق محفوظة",
             days: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
-            shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "عطلة" },
+            shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "استراحة" }, // تم التعديل هنا
             groups: ["الوردية A", "الوردية B", "الوردية C", "الوردية D"]
         },
         en: {
@@ -148,8 +148,6 @@
 
     const refDate = new Date(2025, 11, 18);
     const sequence = ['A','A','A','M','M','M','O','O','O','N','N','N'];
-    
-    // تم تبديل القيم هنا بين B و D كما طلبت
     const groupOffsets = {A:0, B:9, C:6, D:3}; 
 
     const monthPicker = document.getElementById('monthPicker');
