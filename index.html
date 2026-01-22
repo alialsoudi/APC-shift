@@ -58,10 +58,11 @@
     }
     [dir="ltr"] .lang-btn { left: auto; right: 20px; }
 
-    #t-export-btn {
-        font-family: 'Noto Kufi Arabic', sans-serif;
-        letter-spacing: normal;
+    .btn-primary {
+        background: black; color: white; border-radius: 16px; font-weight: 700;
+        transition: all 0.2s; font-family: 'Noto Kufi Arabic', sans-serif;
     }
+    .btn-primary:active { scale: 0.96; }
 </style>
 </head>
 
@@ -105,21 +106,25 @@
         <div id="calendarGrid" class="grid grid-cols-7 gap-[3px] p-2"></div>
     </div>
 
-    <button onclick="exportToCalendar()" id="t-export-btn"
-            class="w-full bg-black text-white text-[13px] font-bold py-4 rounded-2xl active:scale-95 transition shadow-lg mb-8">
-        تصدير للتقويم
-    </button>
+    <div class="flex flex-col gap-3 mb-8">
+        <button onclick="exportToCalendar('month')" id="t-export-month" class="btn-primary w-full py-4 text-[13px] shadow-lg">
+            تصدير الشهر الحالي
+        </button>
+        <button onclick="exportToCalendar('year')" id="t-export-year" class="btn-primary w-full py-4 text-[13px] opacity-80 shadow-md">
+            تصدير السنة كاملة
+        </button>
+    </div>
 
     <div class="mt-auto py-4 text-center border-t border-gray-100">
         <p class="text-[10px] text-gray-400 font-medium">
-            © <span id="year"></span> <span id="t-rights">جميع الحقوق محفوظة</span> | <span class="text-gray-600 font-bold tracking-wide">Ali Al-Soudi</span>
+            © <span id="yearDisplay"></span> <span id="t-rights">جميع الحقوق محفوظة</span> | <span class="text-gray-600 font-bold tracking-wide">Ali Al-Soudi</span>
         </p>
     </div>
 </div>
 
 <script>
     let currentLang = 'ar';
-    document.getElementById('year').innerText = new Date().getFullYear();
+    document.getElementById('yearDisplay').innerText = new Date().getFullYear();
 
     const i18n = {
         ar: {
@@ -127,10 +132,11 @@
             company: "شركة البوتاس العربية",
             selectShift: "اختر الوردية",
             pickMonth: "اختر الشهر",
-            exportBtn: "تصدير للتقويم",
+            exportMonth: "تصدير الشهر الحالي",
+            exportYear: "تصدير السنة كاملة",
             rights: "جميع الحقوق محفوظة",
             days: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
-            shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "استراحة" }, // تم التعديل هنا
+            shifts: { M: "صباحي", A: "مسائي", N: "ليلي", O: "استراحة" },
             groups: ["الوردية A", "الوردية B", "الوردية C", "الوردية D"]
         },
         en: {
@@ -138,7 +144,8 @@
             company: "Arab Potash Company",
             selectShift: "Select Shift",
             pickMonth: "Pick Month",
-            exportBtn: "Export Calendar",
+            exportMonth: "Export Current Month",
+            exportYear: "Export Full Year",
             rights: "All Rights Reserved",
             days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             shifts: { M: "Morning", A: "After<br>Noon", N: "Night", O: "Off" },
@@ -173,13 +180,12 @@
         document.getElementById('t-company').innerText = lang.company;
         document.getElementById('t-select-shift').innerText = lang.selectShift;
         document.getElementById('t-pick-month').innerText = lang.pickMonth;
-        document.getElementById('t-export-btn').innerText = lang.exportBtn;
+        document.getElementById('t-export-month').innerText = lang.exportMonth;
+        document.getElementById('t-export-year').innerText = lang.exportYear;
         document.getElementById('t-rights').innerText = lang.rights;
 
         const options = shiftSelect.options;
-        for (let i = 0; i < options.length; i++) {
-            options[i].text = lang.groups[i];
-        }
+        for (let i = 0; i < options.length; i++) { options[i].text = lang.groups[i]; }
         weekDaysRow.innerHTML = lang.days.map(d => `<div>${d}</div>`).join('');
     }
 
@@ -212,13 +218,21 @@
         }
     }
 
-    function exportToCalendar() {
+    function exportToCalendar(mode) {
         const [y, m] = monthPicker.value.split('-').map(Number);
-        const daysCount = new Date(y, m, 0).getDate();
         let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Shifts//EN\n";
+        
+        // تحديد نطاق الأيام (شهر واحد أو سنة كاملة)
+        let startDate, endDate;
+        if (mode === 'month') {
+            startDate = new Date(y, m - 1, 1);
+            endDate = new Date(y, m, 0);
+        } else {
+            startDate = new Date(y, 0, 1); // 1 يناير
+            endDate = new Date(y, 11, 31); // 31 ديسمبر
+        }
 
-        for (let d = 1; d <= daysCount; d++) {
-            const cur = new Date(y, m - 1, d);
+        for (let cur = new Date(startDate); cur <= endDate; cur.setDate(cur.getDate() + 1)) {
             let idx = Math.floor((cur - refDate) / (86400000)) + groupOffsets[shiftSelect.value];
             idx = ((idx % 12) + 12) % 12;
             
@@ -232,11 +246,12 @@
 
             ics += `BEGIN:VEVENT\nSUMMARY:${label}\nDTSTART;VALUE=DATE:${dateStr}\nDTEND;VALUE=DATE:${nextDateStr}\nEND:VEVENT\n`;
         }
+        
         ics += "END:VCALENDAR";
 
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
-        a.download = `APC_Shifts_${m}_${y}.ics`;
+        a.download = mode === 'month' ? `APC_Shifts_${m}_${y}.ics` : `APC_Shifts_FullYear_${y}.ics`;
         a.click();
     }
 
